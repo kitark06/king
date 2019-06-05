@@ -6,6 +6,9 @@ import model.User;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class LoginService {
 
@@ -13,6 +16,12 @@ public class LoginService {
 
     final char A = 65;
     final char Z = 90;
+
+    public LoginService()
+    {
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleWithFixedDelay(() -> cleanup(), 11, 11, TimeUnit.MINUTES);
+    }
 
     public String doLogin_Get(String userId) {
         User user = new User(userId);
@@ -26,6 +35,8 @@ public class LoginService {
 
         // set the session in the map
         sessionInfoMap.put(sessionInfo.getSessionId(), sessionInfo);
+
+        sessionInfoMap.forEachValue(1, session -> {System.out.println(session.getSessionId() + " --> " + isSessionValid(session));});
 
         // return it
         return sessionInfo;
@@ -51,6 +62,15 @@ public class LoginService {
 
     public SessionInfo getSessionInfo(String sessionId) {
         return sessionInfoMap.get(sessionId);
+    }
+
+    public void cleanup()
+    {
+        sessionInfoMap.values().forEach(sessionInfo -> {
+            if (isSessionValid(sessionInfo) == false)
+                sessionInfoMap.remove(sessionInfo.getSessionId());
+        });
+
     }
 
 }

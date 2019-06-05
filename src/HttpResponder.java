@@ -13,9 +13,7 @@ import java.net.InetSocketAddress;
 public class HttpResponder {
 
     private void start() throws IOException {
-        String payload = "duke";
-        HttpServer server = HttpServer.create(new InetSocketAddress(4250), 0);
-
+        HttpServer server = HttpServer.create(new InetSocketAddress(8081), 0);
         HttpContext rootContext = server.createContext("/");
         LoginService loginService = new LoginService();
         ScoreService scoreService = new ScoreService(loginService);
@@ -30,7 +28,12 @@ public class HttpResponder {
                 // eg http://localhost:8081/4711/login
                 case Constants.LOGIN: {
                     String userId = urlSplits[urlSplits.length - 2];
-                    loginService.doLogin_Get(userId);
+                    String payload=loginService.doLogin_Get(userId);
+                    handler.sendResponseHeaders(200, payload.getBytes().length);
+                    final OutputStream output = handler.getResponseBody();
+                    output.write(payload.getBytes());
+                    output.flush();
+                    handler.close();
                     break;
                 }
 
@@ -41,6 +44,7 @@ public class HttpResponder {
                     String levelId = urlSplits[urlSplits.length - 2];
                     String sessionId = handler.getRequestURI().getQuery().split("=")[1];
                     scoreService.postScore(levelId, sessionId, Integer.parseInt(score));
+                    handler.close();
                     break;
                 }
 
@@ -56,11 +60,7 @@ public class HttpResponder {
             }
 
 
-            handler.sendResponseHeaders(200, payload.getBytes().length);
-            final OutputStream output = handler.getResponseBody();
-            output.write(payload.getBytes());
-            output.flush();
-            handler.close();
+
         });
 
         server.start();

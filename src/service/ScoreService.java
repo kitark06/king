@@ -17,11 +17,8 @@ public class ScoreService {
         if (loginService.isSessionValid(sessionInfo)) {
             // TODO
             String userId = sessionInfo.getUser().getUserId();
+            System.out.println(userId+" --> " + score);
             // do the operation
         }
     }
-
-    /*public static void main(String[] args) {
-        new ScoreService().postScore("http://localhost:8081/2/score?sessionkey=UICSNDK".split("/"));
-    }*/
 }
