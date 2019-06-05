@@ -1,6 +1,6 @@
 package service;
 
-import model.Session;
+import model.SessionInfo;
 import model.User;
 
 import java.time.Duration;
@@ -9,38 +9,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class LoginService {
 
-    ConcurrentHashMap<User, Session> userSessionMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, SessionInfo> sessionInfoMap = new ConcurrentHashMap<>();
 
     final char A = 65;
     final char Z = 90;
 
-    public String doLogin_Get(String[] urlSplits) {
-        String userId = urlSplits[urlSplits.length - 2];
+    public String doLogin_Get(String userId) {
         User user = new User(userId);
-        return getUserSession(user).getSessionId();
+        return createUserSession(user).getSessionId();
     }
 
-    private Session getUserSession(User user) {
-        Session existingSession = userSessionMap.get(user);
+    private SessionInfo createUserSession(User user) {
+        // create session
+        Instant now = Instant.now();
+        SessionInfo sessionInfo = new SessionInfo(generateNewSessionId(8), now, user);
 
-        // if session is not present or has expired
-        if (existingSession == null
-                || Duration.between(existingSession.getTimestamp(), Instant.now()).toMinutes() > 10) {
-            // create session
-            Instant now = Instant.now();
-            Session newSession = new Session(generateSessionId(8), now);
+        // set the session in the map
+        sessionInfoMap.put(sessionInfo.getSessionId(), sessionInfo);
 
-            // set the session in the map
-            userSessionMap.put(user,newSession);
-
-            // return it
-            return newSession;
-        }
-
-        return existingSession;
+        // return it
+        return sessionInfo;
     }
 
-    public String generateSessionId(int length) {
+    public String generateNewSessionId(int length) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             char randomChar = (char) (Math.round(Math.random() * (Z - A)) + A);
@@ -48,4 +39,18 @@ public class LoginService {
         }
         return builder.toString();
     }
+
+    public boolean isSessionValid(SessionInfo sessionInfo) {
+        // if sessionInfo is not present or has expired
+        if (sessionInfo == null
+                || Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() > 10)
+            return false;
+        else
+            return true;
+    }
+
+    public SessionInfo getSessionInfo(String sessionId) {
+        return sessionInfoMap.get(sessionId);
+    }
+
 }
