@@ -10,7 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class LoginService {
+public class LoginService
+{
 
     ConcurrentHashMap<String, SessionInfo> sessionInfoMap = new ConcurrentHashMap<>();
 
@@ -23,12 +24,14 @@ public class LoginService {
         exec.scheduleWithFixedDelay(() -> cleanup(), 11, 11, TimeUnit.MINUTES);
     }
 
-    public String doLogin_Get(String userId) {
+    public String doLogin_Get(String userId)
+    {
         User user = new User(userId);
         return createUserSession(user).getSessionId();
     }
 
-    private SessionInfo createUserSession(User user) {
+    private SessionInfo createUserSession(User user)
+    {
         // create session
         Instant now = Instant.now();
         SessionInfo sessionInfo = new SessionInfo(generateNewSessionId(8), now, user);
@@ -42,33 +45,33 @@ public class LoginService {
         return sessionInfo;
     }
 
-    public String generateNewSessionId(int length) {
+    public String generateNewSessionId(int length)
+    {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++)
+        {
             char randomChar = (char) (Math.round(Math.random() * (Z - A)) + A);
             builder.append(randomChar);
         }
         return builder.toString();
     }
 
-    public boolean isSessionValid(SessionInfo sessionInfo) {
+    public boolean isSessionValid(SessionInfo sessionInfo)
+    {
         // if sessionInfo is not present or has expired
-        if (sessionInfo == null
-                || Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() > 10)
-            return false;
-        else
-            return true;
+        if (sessionInfo == null || Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() > 10) return false;
+        else return true;
     }
 
-    public SessionInfo getSessionInfo(String sessionId) {
+    public SessionInfo getSessionInfo(String sessionId)
+    {
         return sessionInfoMap.get(sessionId);
     }
 
     public void cleanup()
     {
         sessionInfoMap.values().forEach(sessionInfo -> {
-            if (isSessionValid(sessionInfo) == false)
-                sessionInfoMap.remove(sessionInfo.getSessionId());
+            if (isSessionValid(sessionInfo) == false) sessionInfoMap.remove(sessionInfo.getSessionId());
         });
 
     }
