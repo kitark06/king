@@ -58,9 +58,6 @@ public class HttpResponder {
                 default:
                     // code to be executed if all cases are not matched;
             }
-
-
-
         });
 
         server.start();
@@ -69,6 +66,4 @@ public class HttpResponder {
     public static void main(String[] args) throws IOException {
         new HttpResponder().start();
     }
-
-
 }
