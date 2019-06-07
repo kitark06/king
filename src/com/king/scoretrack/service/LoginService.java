@@ -1,7 +1,7 @@
-package service;
+package com.king.scoretrack.service;
 
-import model.SessionInfo;
-import model.User;
+import com.king.scoretrack.model.SessionInfo;
+import com.king.scoretrack.model.User;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,15 +33,13 @@ public class LoginService
     private SessionInfo createUserSession(User user)
     {
         // create session
-        Instant now = Instant.now();
-        SessionInfo sessionInfo = new SessionInfo(generateNewSessionId(8), now, user);
+        Instant timeStamp = Instant.now();
+        String sessionId = generateNewSessionId(8);
+        SessionInfo sessionInfo = new SessionInfo(sessionId, timeStamp, user);
 
         // set the session in the map
         sessionInfoMap.put(sessionInfo.getSessionId(), sessionInfo);
 
-        sessionInfoMap.forEachValue(1, session -> {System.out.println(session.getSessionId() + " --> " + isSessionValid(session));});
-
-        // return it
         return sessionInfo;
     }
 
@@ -59,8 +57,7 @@ public class LoginService
     public boolean isSessionValid(SessionInfo sessionInfo)
     {
         // if sessionInfo is not present or has expired
-        if (sessionInfo == null || Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() > 10) return false;
-        else return true;
+        return sessionInfo != null && Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() <= 10;
     }
 
     public SessionInfo getSessionInfo(String sessionId)

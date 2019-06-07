@@ -1,8 +1,4 @@
-package model;
-
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
+package com.king.scoretrack.model;
 
 public class UserScore implements Comparable<UserScore>
 {
@@ -60,8 +56,20 @@ public class UserScore implements Comparable<UserScore>
     {
         return "UserScore{" + "userId='" + userId + '\'' + ", score=" + score + '}';
     }
+
 }
 
+
+//    public static void main(String[] args) {
+//        PriorityBlockingQueue<UserScore> queue = new PriorityBlockingQueue<>();
+//        queue.add(new UserScore("a", 2));
+//        queue.add(new UserScore("b", 3));
+//        queue.remove(new UserScore("b", 0));
+//
+//        queue.forEach(userScore -> {
+//            System.out.println(userScore);
+//        });
+//    }
 
    /*
         addx(new UserScore("a", 2));

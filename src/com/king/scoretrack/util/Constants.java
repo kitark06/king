@@ -1,4 +1,4 @@
-package util;
+package com.king.scoretrack.util;
 
 public class Constants {
     public static final String LOGIN = "login";

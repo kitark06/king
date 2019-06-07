@@ -1,4 +1,4 @@
-package model;
+package com.king.scoretrack.model;
 
 import java.time.Instant;
 import java.util.Objects;

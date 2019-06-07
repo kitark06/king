@@ -1,6 +1,4 @@
-package model;
-
-import java.util.Objects;
+package com.king.scoretrack.model;
 
 public class User {
 

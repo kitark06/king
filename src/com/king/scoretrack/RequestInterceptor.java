@@ -1,21 +1,26 @@
+package com.king.scoretrack;
+
+import com.king.scoretrack.service.LoginService;
+import com.king.scoretrack.service.ScoreService;
+import com.king.scoretrack.util.Constants;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
-import service.LoginService;
-import service.ScoreService;
-import util.Constants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
-public class HttpResponder
+public class RequestInterceptor
 {
 
     private void start() throws IOException
     {
         HttpServer server = HttpServer.create(new InetSocketAddress(8081), 0);
+        server.setExecutor(Executors.newCachedThreadPool());
+        System.out.println("Server started and listening at port "+server.getAddress().getPort());
         HttpContext rootContext = server.createContext("/");
         LoginService loginService = new LoginService();
         ScoreService scoreService = new ScoreService(loginService);
@@ -65,7 +70,17 @@ public class HttpResponder
                     break;
                 }
 
-                default:
+                /*case "threadtest":
+                {
+                    System.out.println(Thread.currentThread().getName()+ " -> Waiting");
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }*/
+
+//                default:
                     // code to be executed if all cases are not matched;
             }
         });
@@ -75,6 +90,6 @@ public class HttpResponder
 
     public static void main(String[] args) throws IOException
     {
-        new HttpResponder().start();
+        new RequestInterceptor().start();
     }
 }
