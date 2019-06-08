@@ -3,32 +3,38 @@ package com.king.scoretrack.model;
 import java.time.Instant;
 import java.util.Objects;
 
-public class SessionInfo {
+public class SessionInfo
+{
 
-    final String sessionId;
-    final Instant timestamp;
-    final User user;
+    private final String sessionId;
+    private final Instant timestamp;
+    private final User user;
 
-    public SessionInfo(String sessionId, Instant timestamp, User user) {
+    public SessionInfo(String sessionId, Instant timestamp, User user)
+    {
         this.sessionId = sessionId;
         this.timestamp = timestamp;
         this.user = user;
     }
 
-    public String getSessionId() {
+    public String getSessionId()
+    {
         return sessionId;
     }
 
-    public Instant getTimestamp() {
+    public Instant getTimestamp()
+    {
         return timestamp;
     }
 
-    public User getUser() {
+    public User getUser()
+    {
         return user;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SessionInfo sessionInfo = (SessionInfo) o;
@@ -36,14 +42,14 @@ public class SessionInfo {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return sessionId.hashCode();
     }
 
     @Override
-    public String toString() {
-        return "SessionInfo{" +
-                "sessionId='" + sessionId + '\'' +
-                '}';
+    public String toString()
+    {
+        return "SessionInfo{" + "sessionId='" + sessionId + '\'' + '}';
     }
 }

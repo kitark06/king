@@ -2,8 +2,8 @@ package com.king.scoretrack.model;
 
 public class UserScore implements Comparable<UserScore>
 {
-    String userId;
-    int score;
+    private String userId;
+    private int score;
 
     public UserScore(String userId, int score)
     {

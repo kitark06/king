@@ -5,6 +5,7 @@ import com.king.scoretrack.model.User;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,18 +14,34 @@ import java.util.concurrent.TimeUnit;
 public class LoginService
 {
 
-    ConcurrentHashMap<String, SessionInfo> sessionInfoMap = new ConcurrentHashMap<>();
+    private Map<String, SessionInfo> sessionInfoMap = new ConcurrentHashMap<>();
+    private final char A = 65;
+    private final char Z = 90;
 
-    final char A = 65;
-    final char Z = 90;
+    private final int sessionIdLength;
+    private final int sessionTimeOutMins;
 
-    public LoginService()
+    public LoginService(int initialDelay, int delay, int sessionIdLength, int sessionTimeOutMins)
     {
+        this.sessionIdLength = sessionIdLength;
+        this.sessionTimeOutMins = sessionTimeOutMins;
+
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleWithFixedDelay(() -> cleanup(), 11, 11, TimeUnit.MINUTES);
+        exec.scheduleWithFixedDelay(() -> cleanup(), initialDelay, delay, TimeUnit.MINUTES);
+        debugger();
     }
 
-    public String doLogin_Get(String userId)
+    //TODO Remove this
+    private void debugger()
+    {
+        sessionInfoMap.put("AAAAAAAA", new SessionInfo("AAAAAAAA",Instant.now(),new User("1")));
+        sessionInfoMap.put("BBBBBBBB", new SessionInfo("BBBBBBBB",Instant.now(),new User("2")));
+        sessionInfoMap.put("CCCCCCCC", new SessionInfo("CCCCCCCC",Instant.now(),new User("3")));
+        sessionInfoMap.put("DDDDDDDD", new SessionInfo("DDDDDDDD",Instant.now(),new User("4")));
+        sessionInfoMap.put("EEEEEEEE", new SessionInfo("EEEEEEEE",Instant.now(),new User("5")));
+    }
+
+    public String doLogin(String userId)
     {
         User user = new User(userId);
         return createUserSession(user).getSessionId();
@@ -34,7 +51,7 @@ public class LoginService
     {
         // create session
         Instant timeStamp = Instant.now();
-        String sessionId = generateNewSessionId(8);
+        String sessionId = generateNewSessionId();
         SessionInfo sessionInfo = new SessionInfo(sessionId, timeStamp, user);
 
         // set the session in the map
@@ -43,10 +60,10 @@ public class LoginService
         return sessionInfo;
     }
 
-    public String generateNewSessionId(int length)
+    private String generateNewSessionId()
     {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < sessionIdLength; i++)
         {
             char randomChar = (char) (Math.round(Math.random() * (Z - A)) + A);
             builder.append(randomChar);
@@ -54,18 +71,18 @@ public class LoginService
         return builder.toString();
     }
 
-    public boolean isSessionValid(SessionInfo sessionInfo)
+    boolean isSessionValid(SessionInfo sessionInfo)
     {
         // if sessionInfo is not present or has expired
-        return sessionInfo != null && Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() <= 10;
+        return sessionInfo != null && Duration.between(sessionInfo.getTimestamp(), Instant.now()).toMinutes() <= sessionTimeOutMins;
     }
 
-    public SessionInfo getSessionInfo(String sessionId)
+    SessionInfo getSessionInfo(String sessionId)
     {
         return sessionInfoMap.get(sessionId);
     }
 
-    public void cleanup()
+    private void cleanup()
     {
         sessionInfoMap.values().forEach(sessionInfo -> {
             if (isSessionValid(sessionInfo) == false) sessionInfoMap.remove(sessionInfo.getSessionId());
