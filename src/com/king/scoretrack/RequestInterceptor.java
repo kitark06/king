@@ -19,16 +19,17 @@ public class RequestInterceptor
     private int sessionIdLength;
     private int sessionTimeOutMins;
     private int priorityQueueCapacity;
+    private LoginService loginService;
 
-    private void start() throws IOException
+    public void start() throws IOException
     {
         HttpServer server = HttpServer.create(new InetSocketAddress(8081), 0);
-        server.setExecutor(Executors.newCachedThreadPool());
+        //TODO change to cached
+//        server.setExecutor(Executors.newFixedThreadPool(4));
         System.out.println("Server started and listening at port " + server.getAddress().getPort());
 
-
         HttpContext rootContext = server.createContext("/");
-        LoginService loginService = new LoginService(initialDelay, delay, sessionIdLength, sessionTimeOutMins);
+        loginService = new LoginService(initialDelay, delay, sessionIdLength, sessionTimeOutMins);
         ScoreService scoreService = new ScoreService(loginService, priorityQueueCapacity);
 
         rootContext.setHandler((handler) -> {
@@ -56,25 +57,25 @@ public class RequestInterceptor
                 {
                     BufferedReader requestBodyReader = new BufferedReader(new InputStreamReader(handler.getRequestBody()));
                     String score = requestBodyReader.readLine();
-                    if(score==null){
+                    if (score == null)
+                    {
                         handler.sendResponseHeaders(400, "Score cannot be null".getBytes().length);
                         final OutputStream output = handler.getResponseBody();
                         output.write("Score cannot be null".getBytes());
                         output.flush();
                         handler.close();
-                    }
-                    else
+                    } else
                     {
-                        try{
+                        try
+                        {
                             int parsedScore = Integer.parseInt(score);
                             String levelId = urlSplits[urlSplits.length - 2];
                             String sessionId = handler.getRequestURI().getQuery().split("=")[1];
-                            scoreService.postScore(levelId, sessionId,parsedScore );
-                            long l= 1000;
-                            handler.sendResponseHeaders(200,l);
+                            scoreService.postScore(levelId, sessionId, parsedScore);
+                            long l = 1000;
+                            handler.sendResponseHeaders(200, l);
                             handler.close();
-                        }
-                        catch (NumberFormatException e)
+                        } catch (NumberFormatException e)
                         {
                             handler.sendResponseHeaders(400, "Please enter a valid score".getBytes().length);
                             final OutputStream output = handler.getResponseBody();
@@ -112,7 +113,6 @@ public class RequestInterceptor
             props.load(new FileReader(propFilePath));
         } catch (IOException e)
         {
-            e.printStackTrace();
             System.out.println("Property File not found. Using default values");
         }
 
@@ -120,13 +120,21 @@ public class RequestInterceptor
         delay = Integer.parseInt(props.getProperty(Constants.DELAY, "11"));
         sessionIdLength = Integer.parseInt(props.getProperty(Constants.SESSION_ID_LENGTH, "8"));
         sessionTimeOutMins = Integer.parseInt(props.getProperty(Constants.SESSION_TIME_OUT_MINS, "10"));
-        priorityQueueCapacity = Integer.parseInt(props.getProperty(Constants.PRIORITY_QUEUE_CAPACITY, "3"));
+        priorityQueueCapacity = Integer.parseInt(props.getProperty(Constants.PRIORITY_QUEUE_CAPACITY, "15"));
     }
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, InterruptedException
     {
         RequestInterceptor server = new RequestInterceptor();
-        server.loadPropertyFile("properties.props");
+        String propFilePath = "";
+        try
+        {
+            propFilePath = args[0];
+        } catch (ArrayIndexOutOfBoundsException e)
+        {
+            System.out.println("Property file argument missing. Using default values");
+        }
+        server.loadPropertyFile(propFilePath);
         server.start();
     }
 }

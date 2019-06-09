@@ -15,6 +15,7 @@ public class LoginService
 {
 
     private Map<String, SessionInfo> sessionInfoMap = new ConcurrentHashMap<>();
+
     private final char A = 65;
     private final char Z = 90;
 
@@ -28,17 +29,6 @@ public class LoginService
 
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleWithFixedDelay(() -> cleanup(), initialDelay, delay, TimeUnit.MINUTES);
-        debugger();
-    }
-
-    //TODO Remove this
-    private void debugger()
-    {
-        sessionInfoMap.put("AAAAAAAA", new SessionInfo("AAAAAAAA",Instant.now(),new User("1")));
-        sessionInfoMap.put("BBBBBBBB", new SessionInfo("BBBBBBBB",Instant.now(),new User("2")));
-        sessionInfoMap.put("CCCCCCCC", new SessionInfo("CCCCCCCC",Instant.now(),new User("3")));
-        sessionInfoMap.put("DDDDDDDD", new SessionInfo("DDDDDDDD",Instant.now(),new User("4")));
-        sessionInfoMap.put("EEEEEEEE", new SessionInfo("EEEEEEEE",Instant.now(),new User("5")));
     }
 
     public String doLogin(String userId)

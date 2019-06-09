@@ -1,14 +1,22 @@
 package com.king.scoretrack.model;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 public class UserScore implements Comparable<UserScore>
 {
     private String userId;
-    private int score;
+    private double score;
 
-    public UserScore(String userId, int score)
+    public UserScore(String userId, double score)
     {
         this.userId = userId;
         this.score = score;
+    }
+
+    public UserScore(String userId)
+    {
+        this.userId = userId;
     }
 
     public String getUserId()
@@ -16,12 +24,7 @@ public class UserScore implements Comparable<UserScore>
         return userId;
     }
 
-    public void setUserId(String userId)
-    {
-        this.userId = userId;
-    }
-
-    public int getScore()
+    public double getScore()
     {
         return score;
     }
@@ -57,38 +60,15 @@ public class UserScore implements Comparable<UserScore>
         return "UserScore{" + "userId='" + userId + '\'' + ", score=" + score + '}';
     }
 
-}
-
-
-//    public static void main(String[] args) {
-//        PriorityBlockingQueue<UserScore> queue = new PriorityBlockingQueue<>();
-//        queue.add(new UserScore("a", 2));
-//        queue.add(new UserScore("b", 3));
-//        queue.remove(new UserScore("b", 0));
-//
-//        queue.forEach(userScore -> {
-//            System.out.println(userScore);
-//        });
-//    }
-
-   /*
-        addx(new UserScore("a", 2));
-        addx(new UserScore("b", 1));
-        addx(new UserScore("b", 2));
-        addx(new UserScore("b", 0));
-        System.out.println(set.containsKey(new UserScore("a", 5)));
-        addx(new UserScore("a", 3));
-        addx(new UserScore("a", 1));
-
-
-    public void addx(UserScore newVal)
+    public static void main(String[] args)
     {
-        int score = userHighScoreMap.get(newVal.userId) == null ? -1 : userHighScoreMap.get(newVal.userId);
-        if (newVal.score > score)
-        {
-            userHighScoreMap.put(newVal.userId, newVal.score);
-            queue.remove(newVal);
-            queue.add(newVal);
-        }
+        SortedSet<UserScore> userScores = new TreeSet<>();
+        System.out.println(userScores.add(new UserScore("abc", 1000)));
+        System.out.println(userScores.add(new UserScore("pqr", 2000)));
+        userScores.add(new UserScore("xyz", 1000));
+
+        userScores.forEach(userScore -> {
+            System.out.println(userScore.toString());
+        });
     }
-}*/
+}

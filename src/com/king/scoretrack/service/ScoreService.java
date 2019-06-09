@@ -2,11 +2,12 @@ package com.king.scoretrack.service;
 
 import com.king.scoretrack.model.SessionInfo;
 import com.king.scoretrack.model.UserScore;
+import com.king.scoretrack.util.Constants;
 import com.king.scoretrack.util.Mutex;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
+
 
 public class ScoreService
 {
@@ -14,7 +15,7 @@ public class ScoreService
     private LoginService loginService;
     private final int priorityQueueCapacity;
     private Map<String, ConcurrentHashMap<String, Integer>> userHighestScorePerLevel = new ConcurrentHashMap<>();
-    private Map<String, PriorityBlockingQueue<UserScore>> levelHighScoresMap = new ConcurrentHashMap<>();
+    private Map<String, SortedSet<UserScore>> levelHighScoresMap = new ConcurrentHashMap<>();
 
     public ScoreService(LoginService service, int priorityQueueCapacity)
     {
@@ -31,21 +32,26 @@ public class ScoreService
         if (loginService.isSessionValid(sessionInfo))
         {
             String userId = sessionInfo.getUser().getUserId();
-
-            PriorityBlockingQueue<UserScore> highScorePQ;
+            SortedSet<UserScore> highScores;
             ConcurrentHashMap<String, Integer> playerHighScores;
 
             // sync & lock requests for same levelId.
             synchronized (mutex.getLock(levelId))
             {
-                highScorePQ = levelHighScoresMap.get(levelId);
-                if (highScorePQ == null)
+                highScores = levelHighScoresMap.get(levelId);
+                if (highScores == null)
                 {
-                    highScorePQ = new PriorityBlockingQueue<>(priorityQueueCapacity);
+                    highScores = Collections.synchronizedSortedSet(new TreeSet<>());
+                    levelHighScoresMap.put(levelId, highScores);
                 }
 
                 playerHighScores = userHighestScorePerLevel.get(levelId);
-                if (playerHighScores == null) playerHighScores = new ConcurrentHashMap<>();
+
+                if (playerHighScores == null)
+                {
+                    playerHighScores = new ConcurrentHashMap<>();
+                    userHighestScorePerLevel.put(levelId, playerHighScores);
+                }
             }
 
             // sync & lock requests for same level & userId.
@@ -56,24 +62,25 @@ public class ScoreService
                 prevScore = userScore == null ? -1 : userScore;
             }
 
-            // check if score is present.. if present, is current greater than prev high score
-            if (score > prevScore)
+            synchronized (mutex.getLock(levelId))
             {
-                playerHighScores.put(userId, score);
+                // check if score is present.. if present, is current greater than prev high score
+                if (score > prevScore)
+                {
+                    playerHighScores.put(userId, score);
+                    highScores.remove(new UserScore(userId));
+                    boolean operationResult = highScores.add(new UserScore(userId, score));
 
-                highScorePQ.remove(new UserScore(userId, -1));
-                highScorePQ.add(new UserScore(userId, score));
+                    // TreeMap cant have 2 users with the same score for the same level as the key here is the numeric value of the score
+                    // adding a .01 if a conflict is found makes sure they are unique & can be inserted
+                    // This addition is "rounded" & reverted back when the scores are sent back.
+                    // since we are holding only 15 entries, even for the worst case scenario [all 15 entries have same score], the .01 additions will not change the score.
+                    while(operationResult == false)
+                        operationResult = highScores.add(new UserScore(userId, score+Constants.NUDGE_FACTOR));
 
-//                //TODO figure this one out
-//                if (highScorePQ.size() > priorityQueueCapacity)
-//                {
-//                    System.out.println("************************************");
-//                    highScorePQ.remove();
-//                }
-
-                //TODO figure this one out
-                userHighestScorePerLevel.put(levelId, playerHighScores);
-                levelHighScoresMap.put(levelId, highScorePQ);
+                    if (highScores.size() > priorityQueueCapacity)
+                        highScores.remove(highScores.last());
+                }
             }
         }
     }
@@ -81,13 +88,16 @@ public class ScoreService
     public String getHighScoreList(String level)
     {
         StringBuilder builder = new StringBuilder();
-        PriorityBlockingQueue<UserScore> userScores = levelHighScoresMap.get(level);
-        for (int i = 0; i < userScores.size(); i++)
+        SortedSet<UserScore> userScores = levelHighScoresMap.get(level);
+        if (userScores==null || userScores.size() == 0)
         {
-            UserScore userScore = userScores.peek();
-            builder.append(userScore.getUserId()).append("=").append(userScore.getScore()).append(",");
+            return "";
         }
-        builder.setLength(builder.length() - 1);
-        return builder.toString();
+        else
+        {
+            userScores.forEach(userScore -> builder.append(userScore.getUserId()).append("=").append(Math.round(userScore.getScore())).append(","));
+            builder.setLength(builder.length() - 1);
+            return builder.toString();
+        }
     }
 }
