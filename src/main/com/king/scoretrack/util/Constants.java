@@ -13,4 +13,5 @@ public class Constants {
     public static final String SESSION_ID_LENGTH = "session.id.length";
     public static final String SESSION_TIME_OUT_MINS = "session.time.out.mins";
     public static final String PRIORITY_QUEUE_CAPACITY = "priority.queue.capacity";
+    public static final String WEB_SERVER_PORT = "web.server.port";
 }

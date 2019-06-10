@@ -8,26 +8,28 @@
     <artifactId>king</artifactId>
     <version>1.0.0</version>
 
-    <dependencies>
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.sun.net.httpserver/http &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.sun.net.httpserver</groupId>-->
-<!--            <artifactId>http</artifactId>-->
-<!--            <version>20070405</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-
-    </dependencies>
-
-
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <powermock.version>1.7.3</powermock.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>${powermock.version}</version>
+        </dependency>
+    </dependencies>
+
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

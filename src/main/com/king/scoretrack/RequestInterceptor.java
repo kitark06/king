@@ -12,7 +12,8 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 
 /**
- * The main Request interceptor class which creates a HttpServer & is repsonsible for catering to .
+ * The main Request interceptor class which creates a HttpServer & is responsible for catering to the httprequests.
+ * Creates a HttpServer backed by a threadpool & each request is executed by a thread.
  */
 public class RequestInterceptor
 {
@@ -22,18 +23,19 @@ public class RequestInterceptor
     private int sessionIdLength;
     private int sessionTimeOutMins;
     private int priorityQueueCapacity;
+    private int port;
     private LoginService loginService;
 
     /**
-     * Start.
+     * Starts the httpserver over at the given port. Default value is 8081.
+     * Executes each request in a thread.
      *
      * @throws IOException the io exception
      */
     public void start() throws IOException
     {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8081), 0);
-        //TODO change to cached
-        server.setExecutor(Executors.newFixedThreadPool(4));
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        server.setExecutor(Executors.newCachedThreadPool());
         System.out.println("Server started and listening at port " + server.getAddress().getPort());
 
         HttpContext rootContext = server.createContext("/");
@@ -114,7 +116,7 @@ public class RequestInterceptor
     }
 
     /**
-     * Load property file.
+     * Loads property file.
      *
      * @param propFilePath the prop file path
      */
@@ -134,16 +136,16 @@ public class RequestInterceptor
         sessionIdLength = Integer.parseInt(props.getProperty(Constants.SESSION_ID_LENGTH, "8"));
         sessionTimeOutMins = Integer.parseInt(props.getProperty(Constants.SESSION_TIME_OUT_MINS, "10"));
         priorityQueueCapacity = Integer.parseInt(props.getProperty(Constants.PRIORITY_QUEUE_CAPACITY, "15"));
+        port = Integer.parseInt(props.getProperty(Constants.WEB_SERVER_PORT, "8081"));
     }
 
     /**
      * The entry point of application.
      *
      * @param args the input arguments
-     * @throws IOException          the io exception
-     * @throws InterruptedException the interrupted exception
+     * @throws IOException          the io exception if unable to start the webserver
      */
-    public static void main(String[] args) throws IOException, InterruptedException
+    public static void main(String[] args) throws IOException
     {
         RequestInterceptor server = new RequestInterceptor();
         String propFilePath = "";

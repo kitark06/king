@@ -2,6 +2,7 @@ package com.king.scoretrack;
 
 import com.king.scoretrack.service.LoginService;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -17,12 +18,17 @@ public class EndToEndHttpTest
 {
     private LoginService loginService;
 
-    @Test
-    public void singleLevelInputTest() throws IOException, InterruptedException
+    @BeforeClass
+    public static void setUp() throws IOException
     {
         RequestInterceptor interceptor = new RequestInterceptor();
         interceptor.loadPropertyFile("");
         interceptor.start();
+    }
+
+    @Test
+    public void singleLevelInputTest() throws IOException, InterruptedException
+    {
         String levelId = "2";
         loginUsersAndPostScores(getInputSetOne(levelId));
         Thread.sleep(5000);
@@ -34,9 +40,6 @@ public class EndToEndHttpTest
     @Test
     public void dualLevelConcurrentInputTest() throws IOException, InterruptedException
     {
-        RequestInterceptor interceptor = new RequestInterceptor();
-        interceptor.loadPropertyFile("");
-        interceptor.start();
         String levelId = "3";
         String levelIdTwo = "2";
         loginUsersAndPostScores(getInputSetTwo(levelId,levelIdTwo));
