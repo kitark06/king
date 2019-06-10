@@ -11,6 +11,9 @@ import java.net.InetSocketAddress;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
+/**
+ * The main Request interceptor class which creates a HttpServer & is repsonsible for catering to .
+ */
 public class RequestInterceptor
 {
 
@@ -21,11 +24,16 @@ public class RequestInterceptor
     private int priorityQueueCapacity;
     private LoginService loginService;
 
+    /**
+     * Start.
+     *
+     * @throws IOException the io exception
+     */
     public void start() throws IOException
     {
         HttpServer server = HttpServer.create(new InetSocketAddress(8081), 0);
         //TODO change to cached
-//        server.setExecutor(Executors.newFixedThreadPool(4));
+        server.setExecutor(Executors.newFixedThreadPool(4));
         System.out.println("Server started and listening at port " + server.getAddress().getPort());
 
         HttpContext rootContext = server.createContext("/");
@@ -105,6 +113,11 @@ public class RequestInterceptor
         server.start();
     }
 
+    /**
+     * Load property file.
+     *
+     * @param propFilePath the prop file path
+     */
     public void loadPropertyFile(String propFilePath)
     {
         Properties props = new Properties();
@@ -123,6 +136,13 @@ public class RequestInterceptor
         priorityQueueCapacity = Integer.parseInt(props.getProperty(Constants.PRIORITY_QUEUE_CAPACITY, "15"));
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     public static void main(String[] args) throws IOException, InterruptedException
     {
         RequestInterceptor server = new RequestInterceptor();

@@ -11,7 +11,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +47,7 @@ public class ScoreServiceTest
         assertEquals(1000, score);
 
         Map<String, SortedSet<UserScore>> levelHighScoresMap = Whitebox.getInternalState(scoreService, "levelHighScoresMap");
-        assertEquals(new UserScore("kartik",1000),levelHighScoresMap.get("2").first() );
+        assertEquals(new UserScore(new User("kartik"),1000),levelHighScoresMap.get("2").first() );
     }
 
     @Test
@@ -71,10 +74,10 @@ public class ScoreServiceTest
     public void getHighScoreList_ReturnsSortedScores_ForLevelWithScores()
     {
         SortedSet<UserScore> userScores = Collections.synchronizedSortedSet(new TreeSet<>());
-        userScores.add(new UserScore("1", 1000));
-        userScores.add(new UserScore("2", 2000));
-        userScores.add(new UserScore("3", 2000));
-        userScores.add(new UserScore("3", 3000));
+        userScores.add(new UserScore(new User("1"), 1000));
+        userScores.add(new UserScore(new User("2"), 2000));
+        userScores.add(new UserScore(new User("3"), 2000));
+        userScores.add(new UserScore(new User("3"), 3000));
 
         Map<String, SortedSet<UserScore>> levelHighScoresMap = new ConcurrentHashMap<>();
         levelHighScoresMap.put("2", userScores);

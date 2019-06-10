@@ -2,7 +2,6 @@ package com.king.scoretrack;
 
 import com.king.scoretrack.service.LoginService;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
